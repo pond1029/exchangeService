@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<title>Home</title>
+</head>
+<body>
+	<h1>환율계산</h1>
+	
+	<span>송금국가: 미국(USD) <input type="hidden" id="from" value="USD"></span><br>
+	<span>수취국가:</span>
+	<select id="to" onchange="printExchangeRate(this.value)">
+		<option th:text="'Choose'" th:value="''"></option>
+		<option th:each="nationCode : ${nationCodeList}" th:value="${nationCode.nationCode}" 
+			th:text="${nationCode.nationCode} + '(' + ${nationCode.krName} + ')'">
+		</option>
+	</select><br>
+	환율:<span id="exchangRate"></span> <br>
+	
+	
+	<span>송금액:</span> <input id="value">USD<br>
+	<button type="button" onclick="submit()">Submit</button><br>
+ 
+	<span id="errorMessage" style="color: red;"></span>
+	<span id="exchangedMoney"></span><br>
+	
+    <script type="text/javascript">
+    	function printExchangeRate(to){
+			var from = document.getElementById('from').value;
+			var exchangeRate = document.getElementById('exchangRate');
+			exchangeRate.innerHTML = '';
+			
+			const url = location.origin + '/exchangeRate?' + 'from=' + from + '&to=' + to;
+			fetch(url)
+				.then(response => response.json())
+			    .then(response => {
+			    	if(response.exchangeRate != null) exchangeRate.innerHTML = response.exchangeRate + from + '/' + to;
+			    });
+    	}
+    	
+    	function submit(){
+			var from = document.getElementById('from').value;
+			var to = document.getElementById('to').value;
+			var value = document.getElementById('value').value;
+			
+			var exchangedMoney = document.getElementById('exchangedMoney');
+			exchangedMoney.innerHTML = '';
+			
+			var errorMessage = document.getElementById('errorMessage');
+			errorMessage.innerHTML = '';
+			
+			const url = location.origin + '/exchangedMoney?' + 'from=' + from + '&to=' + to + '&value=' + value;
+			
+			fetch(url)
+				.then((response) => {
+					if (!response.ok){
+			            response.json().then(data =>{
+			            	errorMessage.innerHTML = data.error;			            	
+			            })	
+			            throw new Error('HTTP status' + response.status);
+					}
+		            return response.json();
+				})
+			    .then(response => {
+			    	exchangedMoney.innerHTML = '수취 금액은 ' + response.exchangedMoney + to + ' 입니다.';
+			    })			    
+			    .catch(error => {
+			    	
+			    });
+			
+			
+    	}    	
+    </script>
+</body>
+</html>

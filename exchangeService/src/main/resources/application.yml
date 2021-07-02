@@ -1,0 +1,5 @@
+api:
+ currencylayer:
+  key: 86827423d7f5da83eb8a0457c2140b8c
+  url: http://api.currencylayer.com/live  
+
